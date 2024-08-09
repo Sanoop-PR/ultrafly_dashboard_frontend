@@ -12,6 +12,7 @@ import { SiSpringsecurity } from "react-icons/si";
 import { PiUserListBold } from "react-icons/pi";
 import { RiMapPinUserFill } from "react-icons/ri";
 import { RiCalendarCheckLine } from "react-icons/ri";
+import { LuFileSpreadsheet } from "react-icons/lu";
 
 // import Logo from "../images/favilogo.png";
 import Logo from '../images/ultraflyimages/ultrafly_logo_recreate.png'
@@ -443,7 +444,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                               }
                             >
                               <div className="flex gap-1">
-                              <RiCalendarCheckLine
+                              <LuFileSpreadsheet
                                   className={`w-5 h-5 block  truncate transition duration-150 ${
                                     pathname.includes("AttendanceSheet")
                                       ? "text-slate-200"

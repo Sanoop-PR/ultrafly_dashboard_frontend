@@ -17,6 +17,7 @@ function AttendancePage() {
   const [attendance, setAttendance] = useState("");
   const [remarks, setRemarks] = useState("");
   const [isShowDepartureBtn, setIsShowDepartureBtn] = useState(false);
+  const [isApproved, setisApproved] = useState(false);
   const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
 
   const { data: users } = useSelector((state) => state.users.getAllUsers);
@@ -24,6 +25,7 @@ function AttendancePage() {
     (state) => state.admin.getOneUserAttendence
   );
   const dispatch = useDispatch();
+
 
   useEffect(() => {
     dispatch(getAllUsers());
@@ -64,11 +66,15 @@ function AttendancePage() {
           : new Date().toLocaleTimeString()
       );
       setIsShowDepartureBtn(!!attendanceUser.arrivalDate);
+
     }
     if (attendanceUser.remarks) {
       setRemarks(attendanceUser.remarks);
     }
-  }, [attendanceUser, users]);
+    if (attendanceUser.status===true) {
+      setisApproved(true);
+    }
+  }, [attendanceUser, users,attendanceUser.status,!attendanceUser.status]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -201,7 +207,7 @@ function AttendancePage() {
             </div>
           )}
 
-          <div className="w-full rounded-lg bg-indigo-500 hover:bg-indigo-600 mt-4 text-white text-lg font-semibold">
+          <div className={`w-full rounded-lg  mt-4 text-white text-lg font-semibold ${isApproved && !attendanceUser.departureDate ? 'bg-green-500':'bg-blue-500'} `}>
             <button type="submit" className="w-full p-2">
               {attendanceUser?.arrivalDate && attendanceUser?.departureDate
                 ? "All Completed"
