@@ -81,8 +81,8 @@ export const getAllAttendence = createAsyncThunk(
   "admin/getAllAttendence",
   async (projectId) => {
     // try {
-      const response = await axios.get(BASE_URL + "/api/attendance/getAllUser");
-      return response.data;
+    const response = await axios.get(BASE_URL + "/api/attendance/getAllUser");
+    return response.data;
     // } catch (error) {
     //   if (
     //     error.response &&
@@ -111,23 +111,130 @@ export const getOneUserAttendence = createAsyncThunk(
 
 export const approveDeparture = createAsyncThunk(
   "admin/approveDeparture",
-  async (
-    {_id,approve },
-    { rejectWithValue }
-  ) => {
+  async ({ _id, approve }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
         `${BASE_URL}/api/attendance/approveDeparture`,
         {
-          _id,approve
+          _id,
+          approve,
         }
       );
-      if (response.data.message) {
+      if (response.data.success===true) {
         notification.success({
-          message: "Success",
           description: response.data.message,
         });
       }
+      if (response.data.success===false) {
+        notification.error({
+          description: response.data.message,
+        });
+      }
+      return response.data;
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        notification.error({
+          message: "Error",
+          description: error.response.data.message,
+        });
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getTodayAttendance = createAsyncThunk(
+  "admin/getTodayAttendance",
+  async (projectId) => {
+    try {
+      const response = await axios.get(
+        BASE_URL + "/api/attendance/getTodayAttendance"
+      );
+      return response.data;
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        notification.error({
+          message: "Error",
+          description: error.response.data.message,
+        });
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+export const getLastWeekAttendance = createAsyncThunk(
+  "admin/getLastWeekAttendance",
+  async (projectId) => {
+    try {
+      const response = await axios.get(
+        BASE_URL + "/api/attendance/getLastWeekAttendance"
+      );
+      return response.data;
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        notification.error({
+          message: "Error",
+          description: error.response.data.message,
+        });
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+export const getLastMonthAttendance = createAsyncThunk(
+  "admin/getLastMonthAttendance",
+  async (projectId) => {
+    try {
+      const response = await axios.get(
+        BASE_URL + "/api/attendance/getLastMonthAttendance"
+      );
+      return response.data;
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        notification.error({
+          message: "Error",
+          description: error.response.data.message,
+        });
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getAttendanceByName = createAsyncThunk(
+  "admin/getAttendanceByName",
+  async ({ emailId }, { rejectWithValue }) => {
+    const response = await axios.post(
+      BASE_URL + `/api/attendance/getAttendanceByName`,
+      { emailId }
+    );
+    return response.data.data;
+  }
+);
+export const getRangeSelectedAttendance = createAsyncThunk(
+  "admin/getRangeSelectedAttendance",
+  async ({ fromDate, toDate }, projectId) => {
+    try {
+      const response = await axios.post(
+        BASE_URL + "/api/attendance/getRangeSelectedAttendance",
+        { fromDate, toDate }
+      );
       return response.data;
     } catch (error) {
       if (
@@ -153,6 +260,11 @@ const adminSlice = createSlice({
     getAllAttendence: { data: [], loading: "idle", error: null },
     getOneUserAttendence: { data: [], loading: "idle", error: null },
     approveDeparture: { data: [], loading: "idle", error: null },
+    getTodayAttendance: { data: [], loading: "idle", error: null },
+    getLastWeekAttendance: { data: [], loading: "idle", error: null },
+    getLastMonthAttendance: { data: [], loading: "idle", error: null },
+    getAttendanceByName: { data: [], loading: "idle", error: null },
+    getRangeSelectedAttendance: { data: [], loading: "idle", error: null },
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -187,6 +299,7 @@ const adminSlice = createSlice({
     builder.addCase(getAllAttendence.fulfilled, (state, action) => {
       state.getAllAttendence.data = action.payload;
       state.getAllAttendence.loading = "succeeded";
+      state.getAllAttendence.status = "succeeded";
     });
     builder.addCase(getAllAttendence.rejected, (state, action) => {
       state.getAllAttendence.error = action.error.message;
@@ -211,10 +324,77 @@ const adminSlice = createSlice({
     builder.addCase(approveDeparture.fulfilled, (state, action) => {
       state.approveDeparture.data = action.payload;
       state.approveDeparture.loading = "succeeded";
+      state.approveDeparture.status = "Accepted";
     });
     builder.addCase(approveDeparture.rejected, (state, action) => {
       state.approveDeparture.error = action.error.message;
       state.approveDeparture.loading = "failed";
+      // state.approveDeparture.status = "Rejected";
+    });
+
+    //   getTodayAttendance
+    builder.addCase(getTodayAttendance.pending, (state) => {
+      state.getTodayAttendance.loading = "loading";
+    });
+    builder.addCase(getTodayAttendance.fulfilled, (state, action) => {
+      state.getTodayAttendance.data = action.payload;
+      state.getTodayAttendance.loading = "succeeded";
+      state.getTodayAttendance.status = "succeeded";
+    });
+    builder.addCase(getTodayAttendance.rejected, (state, action) => {
+      state.getTodayAttendance.error = action.error.message;
+      state.getTodayAttendance.loading = "failed";
+    });
+    //   getLastWeekAttendance
+    builder.addCase(getLastWeekAttendance.pending, (state) => {
+      state.getLastWeekAttendance.loading = "loading";
+    });
+    builder.addCase(getLastWeekAttendance.fulfilled, (state, action) => {
+      state.getLastWeekAttendance.data = action.payload;
+      state.getLastWeekAttendance.loading = "succeeded";
+    });
+    builder.addCase(getLastWeekAttendance.rejected, (state, action) => {
+      state.getLastWeekAttendance.error = action.error.message;
+      state.getLastWeekAttendance.loading = "failed";
+    });
+    //   getLastMonthAttendance
+    builder.addCase(getLastMonthAttendance.pending, (state) => {
+      state.getLastMonthAttendance.loading = "loading";
+    });
+    builder.addCase(getLastMonthAttendance.fulfilled, (state, action) => {
+      state.getLastMonthAttendance.data = action.payload;
+      state.getLastMonthAttendance.loading = "succeeded";
+      state.getLastMonthAttendance.status = "succeeded";
+    });
+    builder.addCase(getLastMonthAttendance.rejected, (state, action) => {
+      state.getLastMonthAttendance.error = action.error.message;
+      state.getLastMonthAttendance.loading = "failed";
+    });
+    //   getAttendanceByName
+    builder.addCase(getAttendanceByName.pending, (state) => {
+      state.getAttendanceByName.loading = "loading";
+    });
+    builder.addCase(getAttendanceByName.fulfilled, (state, action) => {
+      state.getAttendanceByName.data = action.payload;
+      state.getAttendanceByName.loading = "succeeded";
+      state.getAttendanceByName.status = "succeeded";
+    });
+    builder.addCase(getAttendanceByName.rejected, (state, action) => {
+      state.getAttendanceByName.error = action.error.message;
+      state.getAttendanceByName.loading = "failed";
+    });
+    //   getRangeSelectedAttendance
+    builder.addCase(getRangeSelectedAttendance.pending, (state) => {
+      state.getRangeSelectedAttendance.loading = "loading";
+    });
+    builder.addCase(getRangeSelectedAttendance.fulfilled, (state, action) => {
+      state.getRangeSelectedAttendance.data = action.payload;
+      state.getRangeSelectedAttendance.loading = "succeeded";
+      state.getRangeSelectedAttendance.status = "succeeded";
+    });
+    builder.addCase(getRangeSelectedAttendance.rejected, (state, action) => {
+      state.getRangeSelectedAttendance.error = action.error.message;
+      state.getRangeSelectedAttendance.loading = "failed";
     });
   },
 });
