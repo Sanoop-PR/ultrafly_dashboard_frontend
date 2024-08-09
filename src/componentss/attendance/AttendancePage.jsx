@@ -83,10 +83,6 @@ function AttendancePage() {
         createAttendance({
           emailId: email,
           name: username,
-          arrivalDate,
-          arrivalTime,
-          departureDate,
-          departureTime,
         })
       );
       console.log(res);
@@ -101,9 +97,6 @@ function AttendancePage() {
       const res = await dispatch(
         departureAttendance({
           emailId: email,
-          arrivalDate,
-          departureDate,
-          departureTime,
           remarks,
         })
       );
