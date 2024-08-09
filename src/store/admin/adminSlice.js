@@ -6,7 +6,7 @@ import { notification } from "antd";
 export const createAttendance = createAsyncThunk(
   "admin/createAttendance",
   async (
-    { emailId, name, arrivalDate, arrivalTime, departureDate, departureTime },
+    { emailId, name},
     { rejectWithValue }
   ) => {
     try {
@@ -15,10 +15,6 @@ export const createAttendance = createAsyncThunk(
         {
           emailId,
           name,
-          arrivalDate,
-          arrivalTime,
-          departureDate,
-          departureTime,
         }
       );
       if (response.data.message) {
@@ -46,13 +42,13 @@ export const createAttendance = createAsyncThunk(
 export const departureAttendance = createAsyncThunk(
   "admin/departureAttendance",
   async (
-    { emailId, arrivalDate, departureDate, departureTime, remarks },
+    { emailId, remarks },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.put(
         `${BASE_URL}/api/attendance/attendanceUpdate`,
-        { emailId, arrivalDate, departureDate, departureTime, remarks }
+        { emailId, remarks }
       );
       if (response.data.message) {
         notification.success({
