@@ -16,6 +16,7 @@ function AttendancePage() {
   const [departureTime, setDepartureTime] = useState("");
   const [attendance, setAttendance] = useState("");
   const [remarks, setRemarks] = useState("");
+  const [location, setLocation] = useState({ latitude: "", longitude: "" });
   const [isShowDepartureBtn, setIsShowDepartureBtn] = useState(false);
   const [isApproved, setisApproved] = useState(false);
   const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
@@ -25,7 +26,6 @@ function AttendancePage() {
     (state) => state.admin.getOneUserAttendence
   );
   const dispatch = useDispatch();
-
 
   useEffect(() => {
     dispatch(getAllUsers());
@@ -66,15 +66,32 @@ function AttendancePage() {
           : new Date().toLocaleTimeString()
       );
       setIsShowDepartureBtn(!!attendanceUser.arrivalDate);
-
     }
     if (attendanceUser.remarks) {
       setRemarks(attendanceUser.remarks);
     }
-    if (attendanceUser.status===true) {
+    if (attendanceUser.status === true) {
       setisApproved(true);
     }
-  }, [attendanceUser, users,attendanceUser.status,!attendanceUser.status]);
+  }, [attendanceUser, users]);
+
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,6 +100,7 @@ function AttendancePage() {
         createAttendance({
           emailId: email,
           name: username,
+          location,
         })
       );
       console.log(res);
@@ -98,6 +116,7 @@ function AttendancePage() {
         departureAttendance({
           emailId: email,
           remarks,
+          location,
         })
       );
       console.log(res);
@@ -187,6 +206,27 @@ function AttendancePage() {
               />
             </div>
           </div>
+
+          <div className="flex flex-col md:flex-row gap-2 justify-center w-full md:mt-4">
+            <div className="w-full">
+              <label className="mb-2 dark:text-gray-300">Location</label>
+              <input
+                type="text"
+                value={`Latitude: ${location.latitude}, Longitude: ${location.longitude}`}
+                disabled
+                className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
+                placeholder="Location"
+              />
+              <button
+                type="button"
+                onClick={getLocation}
+                className="mt-2 p-2 bg-blue-500 text-white rounded-lg"
+              >
+                Get Location
+              </button>
+            </div>
+          </div>
+
           {isShowDepartureBtn && (
             <div className="w-full">
               <label className="mb-2 dark:text-gray-300">Remarks</label>
@@ -200,7 +240,13 @@ function AttendancePage() {
             </div>
           )}
 
-          <div className={`w-full rounded-lg  mt-4 text-white text-lg font-semibold ${isApproved && !attendanceUser.departureDate ? 'bg-green-500':'bg-blue-500'} `}>
+          <div
+            className={`w-full rounded-lg mt-4 text-white text-lg font-semibold ${
+              isApproved && !attendanceUser.departureDate
+                ? "bg-green-500"
+                : "bg-blue-500"
+            } `}
+          >
             <button type="submit" className="w-full p-2">
               {attendanceUser?.arrivalDate && attendanceUser?.departureDate
                 ? "All Completed"

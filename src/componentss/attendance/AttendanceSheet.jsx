@@ -31,6 +31,7 @@ const AttendanceSheet = () => {
   const [displayedData, setDisplayedData] = useState([]); // State for table data
   // this option for date formate like dd/mm/yy
   const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
+  
 
   const dispatch = useDispatch();
   const { data: allusers } = useSelector((state) => state.users.getAllUsers);
@@ -47,11 +48,15 @@ const AttendanceSheet = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Set default data on initial load
     if (allAttendenceStatus === "succeeded") {
-      setDisplayedData(allAttendence.data);
+      const updatedData = allAttendence.data.map((item) => ({
+        ...item,
+        status: null, // Add status field
+      }));
+      setDisplayedData(updatedData);
     }
   }, [allAttendence, allAttendenceStatus]);
+  
 
   //
   const handleRegularizationAccept = async () => {
@@ -61,6 +66,12 @@ const AttendanceSheet = () => {
           _id: currentFileId,
           approve: true,
         })
+      );
+      // Update status to 'accepted'
+      setDisplayedData((prevData) =>
+        prevData.map((item) =>
+          item._id === currentFileId ? { ...item, status: "accepted" } : item
+        )
       );
       closeModal();
     } catch (error) {
@@ -75,6 +86,12 @@ const AttendanceSheet = () => {
           _id: currentFileId,
           approve: false,
         })
+      );
+      // Update status to 'rejected'
+      setDisplayedData((prevData) =>
+        prevData.map((item) =>
+          item._id === currentFileId ? { ...item, status: "rejected" } : item
+        )
       );
       closeModal();
     } catch (error) {
@@ -400,6 +417,9 @@ const AttendanceSheet = () => {
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
                 <tr>
+                <th scope="col" className="px-4 py-3">
+                    S.No
+                  </th>
                   <th scope="col" className="px-4 py-3">
                     Date
                   </th>
@@ -446,19 +466,24 @@ const AttendanceSheet = () => {
                       {timeFormate(file.departureDate)}
                     </td>
                     <td className="px-4 py-3">
-                      <button
+                       <button
                         onClick={() => openModal(file._id, file.remarks)}
                         disabled={file.departureDate}
-                        className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-blue-300 ${
-                          file.departureDate ? "bg-blue-200" : "bg-blue-500"
-                        }`}
-                      >
-                        <span className="md:hidden ">
-                          <FiUserCheck />
-                        </span>
-                        <span className=" max-md:hidden ">Regularize</span>
-                      </button>
-                    </td>
+                        className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 ${
+                        file.status === "accepted"
+                        ? "bg-green-500 hover:bg-green-600 focus:ring-green-300"
+                        : file.status === "rejected"
+                        ? "bg-red-500 hover:bg-red-600 focus:ring-red-300"
+                       : "bg-blue-500 hover:bg-blue-600 focus:ring-blue-300"
+                      }`}
+                     >
+                          <span className="md:hidden">
+                               <FiUserCheck />
+                         </span>
+                         <span className="max-md:hidden">Regularize</span>
+                             </button>
+                      </td>
+
                   </tr>
                 ))}
               </tbody>
