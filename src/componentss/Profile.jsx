@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaCloudUploadAlt } from "react-icons/fa";
-import { BASE_URL } from "../store/constant";
 import {
-  ProfileuploadImage,
-  getAllUsers,
+  getImage,
   ProfileUpdate,
+  findUser,
 } from "../store/api/userApiSlice";
 
 const Profile = () => {
   const { userInfo } = useSelector((state) => state.auth);
-  const { data: users } = useSelector((state) => state.users.getAllUsers);
-  const [userDetails, setUserDetails] = useState(null);
+  const { data: findedUser } = useSelector((state) => state.users.findUser);
+  const { data: gettedImg } = useSelector((state) => state.users.getImage);
 
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
   const [username, setuserame] = useState("");
   const [gender, setgender] = useState();
   const [email, setemail] = useState("");
@@ -21,38 +20,34 @@ const Profile = () => {
   const [employeeCode, setEmployeeCode] = useState("");
   const [DateOfjoining, setDateOfjoining] = useState("");
   const [position, setPosition] = useState("");
-  const [imageUrl, setImageUrl] = useState(null);
   const dispatch = useDispatch();
+  const emailId = JSON.parse(localStorage.getItem("userInfo"));
 
   useEffect(() => {
-    console.log("Profile image Url", imageUrl);
-  }, [imageUrl]);
-
-  useEffect(() => {
-    dispatch(getAllUsers());
+    dispatch(findUser({ email: emailId?.email }));
   }, [dispatch]);
+  
+  useEffect(() => {
+    dispatch(getImage(findedUser?.image));
+  }, [dispatch,gettedImg,findedUser]);
 
   useEffect(() => {
-    if (userInfo && users) {
-      const user = users.filter((user) => user._id === userInfo._id);
-      setUserDetails(user[0]);
-    }
-  }, [userInfo, users]);
-  useEffect(() => {
-    if (userDetails) {
-      setuserame(userDetails.username);
-      setemail(userDetails.email);
-      setgender(userDetails.gender);
-      setImage(userDetails.image);
-      setEmployeeCode(userDetails.employeeCode);
-      setDateOfjoining(userDetails.DateOfjoining);
-      setPosition(userDetails.position);
+    if (findedUser) {
+      setuserame(findedUser.username);
+      setemail(findedUser.email);
+      setgender(findedUser.gender);
+      // setImage(gettedImg);
+      setEmployeeCode(findedUser.employeeCode);
+      setDateOfjoining(
+        findedUser.DateOfjoining && findedUser.DateOfjoining.split("T")[0]
+      );
+      setPosition(findedUser.position);
       setbirthdate(
-        userDetails.birthdate &&
-          new Date(userDetails.birthdate).toISOString().split("T")[0]
+        findedUser.birthdate &&
+          new Date(findedUser.birthdate).toISOString().split("T")[0]
       );
     }
-  }, [userDetails]);
+  }, [findedUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,35 +56,24 @@ const Profile = () => {
       const { data } = await dispatch(
         ProfileUpdate({
           userId: userInfo._id,
-          username,email,gender,birthdate,image,employeeCode,DateOfjoining,position
+          username,
+          email,
+          gender,
+          birthdate,
+          image,
+          employeeCode,
+          DateOfjoining,
+          position,
         })
       );
-      // navigate("/Admindashboard/project-card");
-      if (data.error) {
-        console.log("error");
-      } else {
-        // navigate('/Admindashboard/project-card');
-        console.log("else");
-      }
     } catch (error) {
       console.error(error);
     }
   };
 
   const uploadFileHandler = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    try {
-      const res = await dispatch(ProfileuploadImage(formData));
-      setImage(res.image);
-      setImageUrl(res.image);
-    } catch (error) {
-      console.log(error);
-    }
+    e.preventDefault();
+    setImage(e.target.files[0]);
   };
   const fileInputRef = useRef();
 
@@ -110,83 +94,83 @@ const Profile = () => {
                 Create Profile
               </h2>
 
-              <form onSubmit={handleSubmit}>
-                <div className="w-full rounded-sm bg-[url()] bg-cover bg-center bg-no-repeat items-center">
-                  {image ? (
-                    <div className="mx-auto flex justify-center w-[241px] h-[241px] bg-blue-300/20 rounded-full  bg-cover bg-center bg-no-repeat">
-                      <div className=" w-[241px] h-[241px]">
-                        <img
-                          className=" w-[241px] h-[241px] rounded-full absolute"
-                          src={BASE_URL + image}
-                          alt=""
-                        />
-                        <div className=" w-[241px] h-[241px] group hover:bg-gray-200  border-4 hover:border-sky-500 opacity-60 rounded-full absolute flex justify-center items-center cursor-pointer transition duration-500">
-                          <FaCloudUploadAlt
-                            className="hidden group-hover:block w-14 h-14 text-green-500"
-                            onClick={handleIconClick}
-                          ></FaCloudUploadAlt>
-                          <input
-                            ref={fileInputRef}
-                            hidden
-                            type="file"
-                            name="image"
-                            accept="image/*"
-                            onChange={uploadFileHandler}
-                            className={!image ? "hidden" : " hidden  w-12 "}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="relative mx-auto flex justify-center w-[241px] h-[241px] bg-blue-300/20 rounded-full bg-cover bg-center bg-no-repeat">
-                      <div className="flex h-full w-full ">
-                        {/* <img
-                          src={BASE_URL + imageUrl}
-                          alt="please upload image"
-                          className=" w-[241px] h-[241px] relative object-cover overflow-hidden"
-                        /> */}
+              <div className="w-full rounded-sm bg-[url()] bg-cover bg-center bg-no-repeat items-center">
+                {gettedImg ? (
+                  <div className="mx-auto flex justify-center w-[241px] h-[241px] bg-blue-300/20 rounded-full  bg-cover bg-center bg-no-repeat">
+                    <div className=" w-[241px] h-[241px]">
+                      <img
+                        className=" w-[241px] h-[241px] rounded-full absolute"
+                        src={gettedImg}
+                        alt=""
+                      />
+                      <div className=" w-[241px] h-[241px] group hover:bg-gray-200  border-4 hover:border-sky-500 opacity-60 rounded-full absolute flex justify-center items-center cursor-pointer transition duration-500">
+                        <FaCloudUploadAlt
+                          className="hidden group-hover:block w-14 h-14 text-green-500"
+                          onClick={handleIconClick}
+                        ></FaCloudUploadAlt>
                         <input
+                          ref={fileInputRef}
                           hidden
-                          required
-                          id="upload_profile"
                           type="file"
                           name="image"
                           accept="image/*"
-                          onChange={uploadFileHandler}
-                          className={!image ? "hidden" : "text-white  "}
+                          onChange={(e) => uploadFileHandler(e)}
+                          className={!image ? "hidden" : " hidden  w-12 "}
                         />
-
-                        <label
-                          htmlFor="upload_profile"
-                          className=" cursor-pointer absolute mt-[90px] ml-[90px]"
-                        >
-                          <svg
-                            data-slot="icon"
-                            className="w-16 h-16 text-amber-500 hover:text-purple-500"
-                            fill="none"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
-                            ></path>
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
-                            ></path>
-                          </svg>
-                        </label>
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="relative mx-auto flex justify-center w-[241px] h-[241px] bg-blue-300/20 rounded-full bg-cover bg-center bg-no-repeat">
+                    <div className="flex h-full w-full ">
+                      {/* <img
+                          src={gettedImg}
+                          alt="please upload image"
+                          className=" w-[241px] h-[241px] relative object-cover overflow-hidden"
+                          /> */}
+                      <input
+                        hidden
+                        required
+                        id="upload_profile"
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        onChange={(e) => uploadFileHandler(e)}
+                        className={!image ? "hidden" : "text-white  "}
+                      />
 
+                      <label
+                        htmlFor="upload_profile"
+                        className=" cursor-pointer absolute mt-[90px] ml-[90px]"
+                      >
+                        <svg
+                          data-slot="icon"
+                          className="w-16 h-16 text-amber-500 hover:text-purple-500"
+                          fill="none"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
+                          ></path>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
+                          ></path>
+                        </svg>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleSubmit}>
                 <div className="flex lg:flex-row md:flex-col sm:flex-col xs:flex-col gap-2 justify-center w-full">
                   <div className="w-full  mb-4 mt-6">
                     <label className="mb-2 dark:text-gray-300">Name</label>
@@ -236,7 +220,9 @@ const Profile = () => {
 
                 <div className="flex lg:flex-row md:flex-col sm:flex-col xs:flex-col gap-2 justify-center w-full">
                   <div className="w-full  mb-4 mt-6">
-                    <label className="mb-2 dark:text-gray-300">Employee Code</label>
+                    <label className="mb-2 dark:text-gray-300">
+                      Employee Code
+                    </label>
                     <input
                       type="text"
                       value={employeeCode}
@@ -296,4 +282,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

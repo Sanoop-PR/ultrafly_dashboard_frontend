@@ -4,11 +4,25 @@ import LineChart from '../../charts/LineChart01';
 import EditMenu from '../../defaultComponents/DropdownEditMenu';
 import Loader from '../../componentss/Loder';
 import { FaUsersLine } from "react-icons/fa6";
-
+import { useSelector, useDispatch } from "react-redux";
+import {
+  getAllUsers,
+} from "../../store/api/userApiSlice";
 // Import utilities
 import { tailwindConfig, hexToRGB } from '../../utils/Utils';
 
 function DashboardCard02() {
+
+  const [employeeList, setEmployeeList] = useState(0);
+
+  const dispatch = useDispatch();
+  const {data: users,} = useSelector((state) => state.users.getAllUsers);
+
+  useEffect(() => {
+    dispatch(getAllUsers());
+    const countEmp = users.filter((user) => user.isAdmin===false).length;
+    setEmployeeList(countEmp);
+  }, [dispatch]);
 
   const chartData = {
     labels: [
@@ -91,8 +105,8 @@ function DashboardCard02() {
             </li>
           </EditMenu>
         </header>
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">....</h2>
-        <div className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase mb-1">Num Of</div>
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Num Of Employees</h2>
+        <div className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase mb-1">Num Of {employeeList}</div>
         <div className="flex items-start mt-8">
           {/* <div className="text-3xl font-bold text-slate-800 dark:text-slate-100 mr-2">{loading?ProjectOrderUserCount.totalOrderUser:(<Loader/>)}</div> */}
           <div className="text-sm font-semibold text-white px-1.5 bg-amber-500 rounded-full">-14%</div>
