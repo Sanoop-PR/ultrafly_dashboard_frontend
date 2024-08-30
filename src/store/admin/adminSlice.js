@@ -14,7 +14,7 @@ export const createAttendance = createAsyncThunk(
         `${BASE_URL}/api/attendance/attendanceCreate`,
         {
           emailId,
-          name,
+          name
         }
       );
       if (response.data.message) {
@@ -76,32 +76,26 @@ export const departureAttendance = createAsyncThunk(
 export const getAllAttendence = createAsyncThunk(
   "admin/getAllAttendence",
   async (projectId) => {
-    // try {
+    try {
     const response = await axios.get(BASE_URL + "/api/attendance/getAllUser");
     return response.data;
-    // } catch (error) {
-    //   if (
-    //     error.response &&
-    //     error.response.data &&
-    //     error.response.data.message
-    //   ) {
-    //     notification.error({
-    //       message: "Error",
-    //       description: error.response.data.message,
-    //     });
-    //   }
-    //   return rejectWithValue(error.response.data);
-    // }
+    } catch (error) {
+      return error
+    }
   }
 );
 
 export const getOneUserAttendence = createAsyncThunk(
   "admin/getOneUserAttendence",
   async ({ emailId }, { rejectWithValue }) => {
-    const response = await axios.get(
-      BASE_URL + `/api/attendance/getUserAttendance/${emailId}`
-    );
-    return response.data.data;
+    try {
+      const response = await axios.get(
+        BASE_URL + `/api/attendance/getUserAttendance/${emailId}`
+      );
+      return response.data.data;
+    } catch (error) {
+      return error
+    }
   }
 );
 
@@ -216,11 +210,15 @@ export const getLastMonthAttendance = createAsyncThunk(
 export const getAttendanceByName = createAsyncThunk(
   "admin/getAttendanceByName",
   async ({ emailId }, { rejectWithValue }) => {
-    const response = await axios.post(
-      BASE_URL + `/api/attendance/getAttendanceByName`,
-      { emailId }
-    );
-    return response.data.data;
+    try {
+      const response = await axios.post(
+        BASE_URL + `/api/attendance/getAttendanceByName`,
+        { emailId }
+      );
+      return response.data.data;
+    } catch (error) {
+      return error
+    }
   }
 );
 export const getRangeSelectedAttendance = createAsyncThunk(

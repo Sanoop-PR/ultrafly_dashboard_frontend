@@ -15,7 +15,7 @@ function Registerform() {
   const { isLoading } = registerUser();
   const { search } = useLocation();
   const sp = new URLSearchParams(search);
-  const redirect = sp.get("redirect") || "/loginpage";
+  const redirect = sp.get("redirect") || "/";
   useEffect(() => {
     if (userInfo) {
       navigate(redirect);

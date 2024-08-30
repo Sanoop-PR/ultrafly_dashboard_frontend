@@ -14,28 +14,29 @@ function AttendancePage() {
   const [arrivalTime, setArrivalTime] = useState("");
   const [departureDate, setDepartureDate] = useState("");
   const [departureTime, setDepartureTime] = useState("");
-  const [attendance, setAttendance] = useState("");
   const [remarks, setRemarks] = useState("");
-  const [location, setLocation] = useState({ latitude: "", longitude: "" });
   const [isShowDepartureBtn, setIsShowDepartureBtn] = useState(false);
   const [isApproved, setisApproved] = useState(false);
   const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
+  const options24Hour = { hour: '2-digit', minute: '2-digit' };
 
   const { data: users } = useSelector((state) => state.users.getAllUsers);
   const { data: attendanceUser } = useSelector(
     (state) => state.admin.getOneUserAttendence
   );
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getAllUsers());
 
-    if (users.length > 0) {
-      setEmail(users[0]?.email);
-      dispatch(getOneUserAttendence({ emailId: users[0]?.email }));
-      setUsername(users[0]?.username || "");
-    }
-  }, [dispatch, users]);
+    // if (userInfo) {
+      setEmail(userInfo?.email);
+      dispatch(getOneUserAttendence({ emailId: userInfo?.email }));
+      setUsername(userInfo?.username);
+    // }
+  }, [dispatch]);
 
   useEffect(() => {
     if (attendanceUser) {
@@ -50,7 +51,7 @@ function AttendancePage() {
       setArrivalTime(
         attendanceUser.arrivalDate
           ? new Date(attendanceUser.arrivalDate).toLocaleTimeString()
-          : new Date().toLocaleTimeString()
+          : new Date().toLocaleTimeString('en-GB', options24Hour)
       );
       setDepartureDate(
         attendanceUser.departureDate
@@ -63,7 +64,7 @@ function AttendancePage() {
       setDepartureTime(
         attendanceUser.departureDate
           ? new Date(attendanceUser.departureDate).toLocaleTimeString()
-          : new Date().toLocaleTimeString()
+          : new Date().toLocaleTimeString('en-GB', options24Hour)
       );
       setIsShowDepartureBtn(!!attendanceUser.arrivalDate);
     }
@@ -73,25 +74,7 @@ function AttendancePage() {
     if (attendanceUser.status === true) {
       setisApproved(true);
     }
-  }, [attendanceUser, users]);
-
-  const getLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-        }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-    }
-  };
+  }, [attendanceUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,7 +83,6 @@ function AttendancePage() {
         createAttendance({
           emailId: email,
           name: username,
-          location,
         })
       );
       console.log(res);
@@ -116,7 +98,6 @@ function AttendancePage() {
         departureAttendance({
           emailId: email,
           remarks,
-          location,
         })
       );
       console.log(res);
@@ -146,20 +127,10 @@ function AttendancePage() {
               <label className="dark:text-gray-300">Email</label>
               <input
                 value={email}
-                type="text"
                 disabled
+                type="text"
                 className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
                 placeholder="email"
-              />
-            </div>
-            <div className="w-full">
-              <label className="dark:text-gray-300">Attendance</label>
-              <input
-                value={attendance}
-                type="text"
-                disabled
-                className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
-                placeholder="Attendance"
               />
             </div>
           </div>
@@ -170,6 +141,7 @@ function AttendancePage() {
               <input
                 type="text"
                 value={arrivalDate}
+                disabled
                 onChange={(e) => setArrivalDate(e.target.value)}
                 className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
                 placeholder="Arrival Date"
@@ -180,6 +152,7 @@ function AttendancePage() {
               <input
                 type="text"
                 value={arrivalTime}
+                disabled
                 onChange={(e) => setArrivalTime(e.target.value)}
                 className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
                 placeholder="Arrival Time"
@@ -190,6 +163,7 @@ function AttendancePage() {
               <input
                 type="text"
                 value={departureDate}
+                disabled
                 onChange={(e) => setDepartureDate(e.target.value)}
                 className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
                 placeholder="Departure Date"
@@ -200,30 +174,11 @@ function AttendancePage() {
               <input
                 type="text"
                 value={departureTime}
+                disabled
                 onChange={(e) => setDepartureTime(e.target.value)}
                 className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
                 placeholder="Departure Time"
               />
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-2 justify-center w-full md:mt-4">
-            <div className="w-full">
-              <label className="mb-2 dark:text-gray-300">Location</label>
-              <input
-                type="text"
-                value={`Latitude: ${location.latitude}, Longitude: ${location.longitude}`}
-                disabled
-                className="mt-2 p-2 w-full border-2 rounded-lg dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
-                placeholder="Location"
-              />
-              <button
-                type="button"
-                onClick={getLocation}
-                className="mt-2 p-2 bg-blue-500 text-white rounded-lg"
-              >
-                Get Location
-              </button>
             </div>
           </div>
 

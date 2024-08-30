@@ -238,16 +238,6 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                                   ? "text-indigo-500"
                                   : "text-slate-400 hover:text-slate-200")
                               }
-                              onClick={(e) => {
-                                if (!userInfo.isAdmin) {
-                                  e.preventDefault();
-                                  notification.error({
-                                    message: "Access Denied",
-                                    description:
-                                      "You do not have permission to access this page.",
-                                  });
-                                }
-                              }}
                             >
                               <div className="flex gap-1">
                                 <MdCreateNewFolder
@@ -266,59 +256,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
-                              to="resume-table"
-                              className={({ isActive }) =>
-                                "block transition duration-150 truncate " +
-                                (isActive
-                                  ? "text-indigo-500"
-                                  : "text-slate-400 hover:text-slate-200")
-                              }
-                              onClick={(e) => {
-                                if (!userInfo.isAdmin) {
-                                  e.preventDefault();
-                                  notification.error({
-                                    message: "Access Denied",
-                                    description:
-                                      "You do not have permission to access this page.",
-                                  });
-                                }
-                              }}
-                            >
-                              <div className="flex gap-1">
-                                <GoProject
-                                  className={`w-5 h-5 block  truncate transition duration-150 ${
-                                    pathname.includes("resume-table")
-                                      ? "text-slate-200"
-                                      : "hover:text-indigo-500"
-                                  }`}
-                                />
-                                <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                  Resume Collection
-                                </span>
-                              </div>
-                            </NavLink>
-                          </li>
-                          <li className="mb-1 last:mb-0">
-                            <NavLink
-                              end
                               to="attendance"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " +
                                 (isActive
                                   ? "text-indigo-500"
                                   : "text-slate-400 hover:text-slate-200")
-                              }
-                              onClick={(e) => {
-                                if (!userInfo.isAdmin) {
-                                  e.preventDefault();
-                                  notification.error({
-                                    message: "Access Denied",
-                                    description:
-                                      "You do not have permission to access this page.",
-                                  });
-                                }
-                              }}
-                            >
+                              }                            >
                               <div className="flex gap-1">
                                 <RiCalendarCheckLine
                                   className={`w-5 h-5 block  truncate transition duration-150 ${
@@ -392,6 +336,16 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                                   ? "text-indigo-500"
                                   : "text-slate-400 hover:text-slate-200")
                               }
+                              onClick={(e) => {
+                                if (!userInfo.isAdmin) {
+                                  e.preventDefault();
+                                  notification.error({
+                                    message: "Access Denied",
+                                    description:
+                                      "You do not have permission to access this page.",
+                                  });
+                                }
+                              }}
                             >
                               <div className="flex gap-1">
                                 <PiUserListBold
@@ -410,6 +364,41 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
+                              to="resume-table"
+                              className={({ isActive }) =>
+                                "block transition duration-150 truncate " +
+                                (isActive
+                                  ? "text-indigo-500"
+                                  : "text-slate-400 hover:text-slate-200")
+                              }
+                              onClick={(e) => {
+                                if (!userInfo.isAdmin) {
+                                  e.preventDefault();
+                                  notification.error({
+                                    message: "Access Denied",
+                                    description:
+                                      "You do not have permission to access this page.",
+                                  });
+                                }
+                              }}
+                            >
+                              <div className="flex gap-1">
+                                <GoProject
+                                  className={`w-5 h-5 block  truncate transition duration-150 ${
+                                    pathname.includes("resume-table")
+                                      ? "text-slate-200"
+                                      : "hover:text-indigo-500"
+                                  }`}
+                                />
+                                <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                  Resume Collection
+                                </span>
+                              </div>
+                            </NavLink>
+                          </li>
+                          <li className="mb-1 last:mb-0">
+                            <NavLink
+                              end
                               to="order-table"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " +
@@ -417,6 +406,16 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                                   ? "text-indigo-500"
                                   : "text-slate-400 hover:text-slate-200")
                               }
+                              onClick={(e) => {
+                                if (!userInfo.isAdmin) {
+                                  e.preventDefault();
+                                  notification.error({
+                                    message: "Access Denied",
+                                    description:
+                                      "You do not have permission to access this page.",
+                                  });
+                                }
+                              }}
                             >
                               <div className="flex gap-1">
                                 <RiMapPinUserFill
@@ -442,6 +441,16 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                                   ? "text-indigo-500"
                                   : "text-slate-400 hover:text-slate-200")
                               }
+                              onClick={(e) => {
+                                if (!userInfo.isAdmin) {
+                                  e.preventDefault();
+                                  notification.error({
+                                    message: "Access Denied",
+                                    description:
+                                      "You do not have permission to access this page.",
+                                  });
+                                }
+                              }}
                             >
                               <div className="flex gap-1">
                               <LuFileSpreadsheet

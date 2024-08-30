@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import { BASE_URL, } from "../constant";
+import { BASE_URL } from "../constant";
 import { notification } from "antd";
 import { data } from "autoprefixer";
 
@@ -100,8 +100,23 @@ export const logoutUser = createAsyncThunk(
 export const getAllUsers = createAsyncThunk(
   "users/getAllUsers",
   async (projectId) => {
-    const response = await axios.get(BASE_URL + "/api/users/");
-    return response.data;
+    try {
+      const response = await axios.get(BASE_URL + "/api/users/");
+      return response.data;
+    } catch (error) {
+      return error
+    }
+  }
+);
+export const findUser = createAsyncThunk(
+  "users/findUser",
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(BASE_URL + `/api/users/find/profile/${email}`);
+      return response.data.data;
+    } catch (error) {
+      return error
+    }
   }
 );
 
@@ -143,10 +158,44 @@ export const updateUserandAdmin = createAsyncThunk(
 
 export const ProfileUpdate = createAsyncThunk(
   "users/ProfileUpdate",
-  async ({ userId, username,email,gender,birthdate,image,employeeCode,DateOfjoining,position }, { rejectWithValue }) => {
-    try {
-      const response = await axios.put(`${BASE_URL}/api/users/profile/${userId}`,{username,email,gender,birthdate,image,employeeCode,DateOfjoining,position});
+  async (
+    {
+      userId,
+      username,
+      email,
+      gender,
+      birthdate,
+      image,
+      employeeCode,
+      DateOfjoining,
+      position,
+    },
+    { rejectWithValue }
+  ) => {
+    const formData = new FormData();
+    formData.append("email", email);
+    // Append other fields
+    formData.append("username", username);
+    formData.append("gender", gender);
+    formData.append("birthdate", birthdate);
+    formData.append("employeeCode", employeeCode);
+    formData.append("DateOfjoining", DateOfjoining);
+    formData.append("position", position);
+    // For file upload
+    if (image) {
+      formData.append("file", image); // Assuming `image` is a file object
+    }
 
+    try {
+      const response = await axios.put(
+        `${BASE_URL}/api/users/profile/${userId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       // Success notification
       if (response.data.message) {
         notification.success({
@@ -212,7 +261,10 @@ export const ProfileuploadImage = createAsyncThunk(
   "users/ProfileuploadImage",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${BASE_URL}/api/uploads/profile`, data);
+      const response = await axios.post(
+        `${BASE_URL}/api/uploads/profile`,
+        data
+      );
 
       if (response.data.message) {
         notification.success({
@@ -237,6 +289,28 @@ export const ProfileuploadImage = createAsyncThunk(
   }
 );
 
+export const getImage = createAsyncThunk("users/getImage", async (filename) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/users/profile/image/${filename}`, 
+      { responseType: 'arraybuffer' } 
+    );
+
+    const blob = new Blob([response.data], { type: response.headers['content-type'] });
+    const imageUrl = URL.createObjectURL(blob);
+    
+    return imageUrl;
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.message) {
+      notification.error({
+        message: "Error",
+        description: error.response.data.message,
+      });
+    }
+    return rejectWithValue(error.response.data);
+  }
+});
+
 const usersSlice = createSlice({
   name: "users",
   initialState: {
@@ -246,8 +320,10 @@ const usersSlice = createSlice({
     getAllUsers: { data: [], loading: "idle", error: null },
     updateUserandAdmin: { data: [], loading: "idle", error: null },
     deleteUserandAdmin: { data: [], loading: "idle", error: null },
-    ProfileuploadImage:{ data: [], loading: "idle", error: null },
-    ProfileUpdate:{data: [], loading: "idle", error: null},
+    ProfileuploadImage: { data: [], loading: "idle", error: null },
+    ProfileUpdate: { data: [], loading: "idle", error: null },
+    getImage: { data: '', loading: "idle", error: null },
+    findUser: { data: '', loading: "idle", error: null },
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -330,24 +406,44 @@ const usersSlice = createSlice({
     //   state.ProfileuploadImage.loading = "failed";
     //   state.ProfileuploadImage.error = action.error.message;
     // });
-    
 
-    // POST PROFILE UPDATE 
-      builder.addCase( ProfileUpdate.pending, (state) => {
-       state. ProfileUpdate.loading = "loading";
-     });
-     builder.addCase( ProfileUpdate.fulfilled, (state, action) => {
-       state. ProfileUpdate.loading = "succeeded";
-     state. ProfileUpdate.data = action.payload;
-     });
-     builder.addCase( ProfileUpdate.rejected, (state, action) => {
-       state. ProfileUpdate.loading = "failed";
-     state. ProfileUpdate.error = action.error.message;
-     });
-    
+    // POST PROFILE UPDATE
+    builder.addCase(ProfileUpdate.pending, (state) => {
+      state.ProfileUpdate.loading = "loading";
+    });
+    builder.addCase(ProfileUpdate.fulfilled, (state, action) => {
+      state.ProfileUpdate.loading = "succeeded";
+      state.ProfileUpdate.data = action.payload;
+    });
+    builder.addCase(ProfileUpdate.rejected, (state, action) => {
+      state.ProfileUpdate.loading = "failed";
+      state.ProfileUpdate.error = action.error.message;
+    });
+    // POST PROFILE UPDATE
+    builder.addCase(getImage.pending, (state) => {
+      state.getImage.loading = "loading";
+    });
+    builder.addCase(getImage.fulfilled, (state, action) => {
+      state.getImage.loading = "succeeded";
+      state.getImage.data = action.payload;
+    });
+    builder.addCase(getImage.rejected, (state, action) => {
+      state.getImage.loading = "failed";
+      state.getImage.error = action.error.message;
+    });
+    // findUser
+    builder.addCase(findUser.pending, (state) => {
+      state.findUser.loading = "loading";
+    });
+    builder.addCase(findUser.fulfilled, (state, action) => {
+      state.findUser.loading = "succeeded";
+      state.findUser.data = action.payload;
+    });
+    builder.addCase(findUser.rejected, (state, action) => {
+      state.findUser.loading = "failed";
+      state.findUser.error = action.error.message;
+    });
   },
 });
 
 export default usersSlice.reducer;
-
-

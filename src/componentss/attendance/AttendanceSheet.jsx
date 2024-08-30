@@ -21,7 +21,8 @@ import * as XLSX from "xlsx";
 const AttendanceSheet = () => {
   const [selectedJobType, setSelectedJobType] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [dropdownForOpenSelectUsers, setDropdownForOpenSelectUsers] = useState(false);
+  const [dropdownForOpenSelectUsers, setDropdownForOpenSelectUsers] =
+    useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [currentFileId, setCurrentFileId] = useState(null);
   const [currentFileRemarks, setCurrentFileRemarks] = useState("");
@@ -31,21 +32,43 @@ const AttendanceSheet = () => {
   const [displayedData, setDisplayedData] = useState([]); // State for table data
   // this option for date formate like dd/mm/yy
   const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
-  
 
   const dispatch = useDispatch();
   const { data: allusers } = useSelector((state) => state.users.getAllUsers);
-  const { data: allAttendence, status: allAttendenceStatus } = useSelector((state) => state.admin.getAllAttendence);
-  const { data: todayAttandance } = useSelector((state) => state.admin.getTodayAttendance);
-  const { data: lastWeekAttendance } = useSelector((state) => state.admin.getLastWeekAttendance);
-  const { data: lastMonthAttendance } = useSelector((state) => state.admin.getLastMonthAttendance);
-  const { data: rangeSelectedAttendance } = useSelector((state) => state.admin.getRangeSelectedAttendance);
-  const { data: attendanceByName } = useSelector((state) => state.admin.getAttendanceByName);
+  const { data: allAttendence, status: allAttendenceStatus } = useSelector(
+    (state) => state.admin.getAllAttendence
+  );
+  const { data: todayAttandance } = useSelector(
+    (state) => state.admin.getTodayAttendance
+  );
+  const { data: lastWeekAttendance } = useSelector(
+    (state) => state.admin.getLastWeekAttendance
+  );
+  const { data: lastMonthAttendance } = useSelector(
+    (state) => state.admin.getLastMonthAttendance
+  );
+  const { data: rangeSelectedAttendance } = useSelector(
+    (state) => state.admin.getRangeSelectedAttendance
+  );
+  const { data: attendanceByName } = useSelector(
+    (state) => state.admin.getAttendanceByName
+  );
 
   useEffect(() => {
     dispatch(getAllUsers());
     dispatch(getAllAttendence());
   }, [dispatch]);
+  
+    // filter table data
+    // all attendance
+
+  const handleAllAttendance = () => {
+    dispatch(getAllAttendence());
+    setDisplayedData(allAttendence.data);
+    setDropdownOpen(false);
+    setDatePickerOpen(false);
+    setSelectedJobType("All");
+  };
 
   useEffect(() => {
     if (allAttendenceStatus === "succeeded") {
@@ -56,6 +79,83 @@ const AttendanceSheet = () => {
       setDisplayedData(updatedData);
     }
   }, [allAttendence, allAttendenceStatus]);
+
+  // get attendance by username
+
+  const handleAttendanceByUserName = (emailId) => {
+    dispatch(getAttendanceByName({ emailId }));
+    setDisplayedData(attendanceByName);
+    setDropdownForOpenSelectUsers(false);
+  };
+
+  useEffect(() => {
+    if (attendanceByName) {
+      setDisplayedData(attendanceByName);
+    }
+  }, [attendanceByName]);
+
+  // get today attendance
+
+  const handleAttendanceToday = () => {
+    dispatch(getTodayAttendance());
+    setDisplayedData(todayAttandance.data);
+    setDropdownOpen(false);
+    setDatePickerOpen(false);
+    setSelectedJobType("Today");
+  };
+  
+  useEffect(() => {
+    if (todayAttandance) {
+      setDisplayedData(todayAttandance.data);
+    }
+  }, [todayAttandance]);
+
+  // get last week attendance 
+
+  const handleAttendanceLastWeek = () => {
+    dispatch(getLastWeekAttendance());
+    setDisplayedData(lastWeekAttendance.data);
+    setDropdownOpen(false);
+    setDatePickerOpen(false);
+    setSelectedJobType("Last Week");
+  };
+  
+  useEffect(() => {
+    if (lastWeekAttendance) {
+      setDisplayedData(lastWeekAttendance.data);
+    }
+  }, [lastWeekAttendance]);
+
+  // get last month attendance
+
+  const handleAttendanceMonth = () => {
+    dispatch(getLastMonthAttendance());
+    setDisplayedData(lastMonthAttendance.data);
+    setDropdownOpen(false);
+    setDatePickerOpen(false);
+    setSelectedJobType("Last Month");
+  };
+  
+  useEffect(() => {
+    if (lastMonthAttendance) {
+      setDisplayedData(lastMonthAttendance.data);
+    }
+  }, [lastMonthAttendance]);
+
+  // get attendance by within range
+
+  const handleAttendanceRange = () => {
+    dispatch(
+      getRangeSelectedAttendance({ fromDate: startDate, toDate: endDate })
+    );
+    setDisplayedData(rangeSelectedAttendance.data);
+  };
+  
+  useEffect(() => {
+    if (rangeSelectedAttendance) {
+      setDisplayedData(rangeSelectedAttendance.data);
+    }
+  }, [rangeSelectedAttendance]);
   
 
   //
@@ -126,50 +226,6 @@ const AttendanceSheet = () => {
     setDropdownOpen(false);
   };
 
-  const handleAttendanceByUserName = (emailId) => {
-    dispatch(getAttendanceByName({ emailId }));
-    setDisplayedData(attendanceByName);
-    setDropdownForOpenSelectUsers(false);
-  };
-  const handleAllAttendance = () => {
-    dispatch(getAllAttendence());
-    setDisplayedData(allAttendence.data);
-    setDropdownOpen(false);
-    setDatePickerOpen(false);
-    setSelectedJobType("All");
-  };
-
-  const handleAttendanceToday = () => {
-    dispatch(getTodayAttendance());
-    setDisplayedData(todayAttandance.data);
-    setDropdownOpen(false);
-    setDatePickerOpen(false);
-    setSelectedJobType("Today");
-  };
-
-  const handleAttendanceLastWeek = () => {
-    dispatch(getLastWeekAttendance());
-    setDisplayedData(lastWeekAttendance.data);
-    setDropdownOpen(false);
-    setDatePickerOpen(false);
-    setSelectedJobType("Last Week");
-  };
-
-  const handleAttendanceMonth = () => {
-    dispatch(getLastMonthAttendance());
-    setDisplayedData(lastMonthAttendance.data);
-    setDropdownOpen(false);
-    setDatePickerOpen(false);
-    setSelectedJobType("Last Month");
-  };
-
-  const handleAttendanceRange = () => {
-    dispatch(
-      getRangeSelectedAttendance({ fromDate: startDate, toDate: endDate })
-    );
-    setDisplayedData(rangeSelectedAttendance.data);
-  };
-
   // function for New Date() formate to get HH:MM
   const timeFormate = (getTime) => {
     const date = new Date(getTime);
@@ -184,8 +240,8 @@ const AttendanceSheet = () => {
   const exportToExcel = () => {
     // Prepare the data for Excel
     const worksheet = XLSX.utils.json_to_sheet(
-      displayedData.map((row,index) => ({
-        "Sl no" : index+1,
+      displayedData.map((row, index) => ({
+        "Sl no": index + 1,
         Date: new Date(row.departureDate).toLocaleDateString(),
         Name: row.name,
         Email: row.emailId,
@@ -374,7 +430,7 @@ const AttendanceSheet = () => {
         <div className="flex justify-center mt-4">
           <div className="p-4 bg-white rounded-lg shadow">
             <button onClick={() => setDatePickerOpen(false)}>
-              <AiOutlineCloseCircle />
+              <AiOutlineCloseCircle className=" text-2xl" />
             </button>
             <h2 className="mb-2 text-center text-sm md:text-lg font-medium">
               Select Date Range
@@ -417,7 +473,7 @@ const AttendanceSheet = () => {
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
                 <tr>
-                <th scope="col" className="px-4 py-3">
+                  <th scope="col" className="px-4 py-3">
                     S.No
                   </th>
                   <th scope="col" className="px-4 py-3">
@@ -441,11 +497,9 @@ const AttendanceSheet = () => {
                 </tr>
               </thead>
               <tbody className="text-center">
-                {displayedData?.map((file,index) => (
+                {displayedData?.map((file, index) => (
                   <tr key={file._id} className="border-b dark:border-gray-700">
-                    <td className="px-4 py-3 text-black-900">
-                      {index+1}
-                    </td>
+                    <td className="px-4 py-3 text-black-900">{index + 1}</td>
                     <td className="px-4 py-3 text-black-900">
                       {new Date(file.arrivalDate).toLocaleDateString(
                         "en-GB",
@@ -466,24 +520,37 @@ const AttendanceSheet = () => {
                       {timeFormate(file.departureDate)}
                     </td>
                     <td className="px-4 py-3">
-                       <button
+                      <button
                         onClick={() => openModal(file._id, file.remarks)}
                         disabled={file.departureDate}
                         className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 ${
-                        file.status === "accepted"
-                        ? "bg-green-500 hover:bg-green-600 focus:ring-green-300"
-                        : file.status === "rejected"
-                        ? "bg-red-500 hover:bg-red-600 focus:ring-red-300"
-                       : "bg-blue-500 hover:bg-blue-600 focus:ring-blue-300"
-                      }`}
-                     >
-                          <span className="md:hidden">
-                               <FiUserCheck />
-                         </span>
-                         <span className="max-md:hidden">Regularize</span>
-                             </button>
-                      </td>
-
+                          file.departureDate
+                            ?  "bg-green-500 hover:bg-green-600 focus:ring-green-300"
+                            : "bg-red-500 hover:bg-red-600 focus:ring-red-300"
+                        }`}
+                      >
+                        <span className="md:hidden">
+                          <FiUserCheck />
+                        </span>
+                        <span className="max-md:hidden">Regularize</span>
+                      </button>
+                      {/* <button
+                        onClick={() => openModal(file._id, file.remarks)}
+                        disabled={file.departureDate}
+                        className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 ${
+                          file.status === "accepted"
+                            ? "bg-green-500 hover:bg-green-600 focus:ring-green-300"
+                            : file.status === "rejected"
+                            ? "bg-red-500 hover:bg-red-600 focus:ring-red-300"
+                            : "bg-blue-500 hover:bg-blue-600 focus:ring-blue-300"
+                        }`}
+                      >
+                        <span className="md:hidden">
+                          <FiUserCheck />
+                        </span>
+                        <span className="max-md:hidden">Regularize</span>
+                      </button> */}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -505,7 +572,7 @@ const AttendanceSheet = () => {
           </button>
           <h2 className="text-lg font-medium mb-4">Early Going Reason..</h2>
           <div>
-            <p className="py-4">{currentFileRemarks}</p>
+            <p className="py-4">{currentFileRemarks?currentFileRemarks:'nothing entered'}</p>
             <button
               type="button"
               onClick={handleRegularizationAccept}
